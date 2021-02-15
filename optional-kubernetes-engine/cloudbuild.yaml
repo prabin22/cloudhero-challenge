@@ -1,0 +1,25 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ["build", "-t", "gcr.io/$PROJECT_ID/bookshelf:$COMMIT_SHA", "./optional-kubernetes-engine"]
+- name: 'gcr.io/cloud-builders/docker'
+  args: ["push", "gcr.io/$PROJECT_ID/bookshelf"]
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+  - set
+  - image
+  - deployment
+  - bookshelf-frontend
+  - bookshelf-app=gcr.io/$PROJECT_ID/bookshelf:$COMMIT_SHA
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=cloudhero-web'
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+  - set
+  - image
+  - deployment
+  - bookshelf-worker
+  - bookshelf-app=gcr.io/$PROJECT_ID/bookshelf:$COMMIT_SHA
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=cloudhero-web'
